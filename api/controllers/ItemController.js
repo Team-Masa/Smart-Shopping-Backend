@@ -27,6 +27,7 @@ module.exports = {
   },
 
   sendItemRFID: function (req, res) {
+    console.log(req.body);
     var asyncTasks = [];
     var rfidArray = req.body.key,
       rfidStringArray = _.values(rfidArray).join('').split('$').slice(1),
@@ -35,17 +36,31 @@ module.exports = {
       });
     console.log(rfidCleanedArray);
     rfidCleanedArray.forEach(function (itemId) {
-      var findQuery = {itemId: itemId},
-        updateQuery = req.body;
-      delete updateQuery.key;
-      updateQuery.sold = true;
+      asyncTasks.push(function (cb) {
+        var findQuery = {itemId: itemId},
+          updateQuery = req.body;
+        updateQuery.key = itemId;
+        updateQuery.sold = true;
 
-      Inventory.find({itemId: itemId}, function (err, found) {
-        DbUtils.upsert(Inventory, findQuery, updateQuery)(err, found);
+        Inventory.find({itemId: itemId}, function (err, found) {
+          DbUtils.upsert(Inventory, findQuery, updateQuery, cb)(err, found);
+        });
       });
     });
-    res.end('ok');
+    async.parallel(asyncTasks, function(){
+      console.log('------ok done------');
+      //res.end('ok');
+      BillService.submitCurrentBill(function(err, data){
+        //res.json(data);
+        if(data.items.length > 0) {
+          res.end(data.id);
+        } else{
+          res.end('No Bill Available');
+        }
+      });
+    });
   }
+
 
 };
 

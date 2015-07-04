@@ -8,7 +8,8 @@
 module.exports = {
 
   addBillForUser : function(req, res){
-    var userId = req.body.userId;
+    var userId = req.body.userId,
+      billId = req.body.billId;
 
     User.find({userId:userId}, function(err, found){
       var foundBills = found.bills || [];

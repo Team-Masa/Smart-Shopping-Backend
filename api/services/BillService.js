@@ -23,7 +23,12 @@ module.exports = {
   },
 
   submitCurrentBill : function(cb){
-    Bill.create(currentBill, cb);
+    if(currentBill.items.length > 0) {
+      Bill.create(currentBill, cb);
+    }
+    else{
+      cb(null,currentBill);
+    }
 
     this.generateNewBill();
   }
