@@ -4,7 +4,8 @@
 
 var currentBill ={
   items : []
-};
+},
+  _ = require('lodash');
 
 module.exports = {
 
@@ -15,6 +16,7 @@ module.exports = {
   },
 
   pushItemToBill : function(item){
+    console.log('--pushing item to bill--');
     currentBill.items.push(item);
   },
 
@@ -24,6 +26,7 @@ module.exports = {
 
   submitCurrentBill : function(cb){
     if(currentBill.items.length > 0) {
+      currentBill.items = _.unique(currentBill.items,'itemId');
       Bill.create(currentBill, cb);
     }
     else{
